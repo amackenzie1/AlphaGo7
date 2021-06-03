@@ -159,18 +159,14 @@ def play_game(tau, depth):
     mcts.search(depth)
     boards.append(mcts.root.board.to_array())
     model_move = mcts.get_move()
-    mcts.info()
     policies.append(mcts.policy)
     x = mcts.advance_root(model_move)
-    mcts.root.board.display()
     while x == 2:
         mcts.search(depth)
         boards.append(mcts.root.board.to_array())
         policies.append(mcts.policy)
         model_move = mcts.get_move() 
-        mcts.info()
         x = mcts.advance_root(model_move)
-        mcts.root.board.display()
 
     boards.append(np.array(mcts.root.board.to_array(), dtype='int8'))
     policies.append(mcts.policy)
