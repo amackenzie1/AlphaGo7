@@ -128,7 +128,7 @@ class MonteCarloSearchTree:
                 del self.root.children[i]
         self.root = self.root.children[move]
         self.num_moves += 1
-        if self.num_moves > 20:
+        if self.num_moves > 25:
             self.tau = 0.2
         if self.root.N == 0:
             self.fill(self.root)
