@@ -44,7 +44,7 @@ model2 = keras.Model(inputs, outputs=[value, policy], name="mini_alphazero")
 model2.summary()
 
 model2.compile(loss={'policy': BinaryCrossentropy(),
-                      'value': 'mse'}, optimizer="adam")
+                      'value': 'mse'}, loss_weights={'policy': 50, 'value': 1}, optimizer="adam")
 
 def get_model():
     return model2 

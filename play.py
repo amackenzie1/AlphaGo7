@@ -15,13 +15,14 @@ import random
 from uuid import uuid1
 import sys 
 from board import Board 
+#from plotting import plot_probs
 
 model = get_model()
 
 
 def evaluate(board):
     if board.is_done():
-        return board.score(), Softmax()(np.array([0]*26, dtype='float32'))
+        return board.score(), Softmax()(np.array([0]*50, dtype='float32'))
 
     val, probs = model(np.array([board.to_array()]))
     return val.numpy()[0][0], np.squeeze(probs)
@@ -42,14 +43,13 @@ class Node:
         self.done = False 
 
 c_puct = 2
-
 class MonteCarloSearchTree:
 
     def fill(self, node):
         if node.move is not None:
             node.board.move(node.move, -1)
         val, probs = evaluate(node.board)
-        #probs = 0.75 * probs + 0.25 * np.random.dirichlet([0.4]*26)
+        #probs = 0.75 * probs + 0.25 * np.random.dirichlet([0.4]*50)
         node.W = val
         node.Q = val
         node.N = 1
@@ -73,14 +73,14 @@ class MonteCarloSearchTree:
     
         
     def get_move(self):
-        distribution = [0 if i not in self.root.children.keys() else self.root.children[i].N for i in range(26)]
-        for i in range(26):
+        distribution = [0 if i not in self.root.children.keys() else self.root.children[i].N for i in range(50)]
+        for i in range(50):
             distribution[i] = distribution[i]**(1/self.tau)
         normalization = sum(distribution)
-        for i in range(26):
+        for i in range(50):
             distribution[i] = distribution[i]/normalization
         self.policy = [round(i, 5) for i in distribution] 
-        move = np.random.choice(a=26, p=distribution)
+        move = np.random.choice(a=50, p=distribution)
         return move
     
     def search_once(self, node):
@@ -128,7 +128,7 @@ class MonteCarloSearchTree:
                 del self.root.children[i]
         self.root = self.root.children[move]
         self.num_moves += 1
-        if self.num_moves > 20:
+        if self.num_moves > 30:
             self.tau = 0.2
         if self.root.N == 0:
             self.fill(self.root)
@@ -139,8 +139,8 @@ class MonteCarloSearchTree:
         return 2
     
     def info(self):
-        print(f"Probabilities: {[0 if i not in self.root.children.keys() else self.root.children[i].P for i in range(26)]}")
-        print(f"Visits: {[0 if i not in self.root.children.keys() else self.root.children[i].N for i in range(26)]}")
+        print(f"Probabilities: {[0 if i not in self.root.children.keys() else self.root.children[i].P for i in range(50)]}")
+        print(f"Visits: {[0 if i not in self.root.children.keys() else self.root.children[i].N for i in range(50)]}")
         print(f"Policy: {self.policy}")
         print(f"Value: {self.root.Q}")
 
@@ -253,43 +253,38 @@ def process(episode_length):
                 fp.close()
 
 
-move_map = {"a1":0, "b1": 1, "c1":2, "d1":3, "e1": 4, "a2":5, "b2":6 , "c2":7, "d2":8,
-            "e2":9, "a3":10, "b3":11, "c3":12, "d3":13, "e3":14, "a4":15, "b4":16,
-            "c4":17, "d4":18, "e4":19, "a5":20, "b5":21, "c5":22, "d5":23, "e5":24, "pass":25}
+def from_letters(move):
+    if move.upper() == "QUIT":
+        exit()
+    if move.upper() == "PASS":
+        return 49
+    row = int("".join([i for i in move if i.isnumeric()]))
+    column = "ABCDEFG".index("".join([i.upper() for i in move if i.isalpha()]))
+    return (row-1) * 7 + column
 
 def play_vs_human(depth):
     mcts = MonteCarloSearchTree(0.2)
-    mcts.search(depth)
-    model_move = mcts.get_move()
-    mcts.info()
-    x = mcts.advance_root(model_move)
-    mcts.root.board.display()
-    human_move = move_map[input("Your move: ").lower()]
-    mcts.advance_root(human_move)
-    mcts.root.board.flip()
-    mcts.root.board.display()
-    mcts.root.board.flip()
-    
+    x = 2
     while x == 2:
         mcts.search(depth)
         model_move = mcts.get_move()
         mcts.info()
+        #plot_probs([0 if i not in mcts.root.children.keys() else mcts.root.children[i].P for i in range(50)])
         x = mcts.advance_root(model_move)
         mcts.root.board.display()
         if x != 2:
-            print("I win!")
             return 1
-        human_move = move_map[input("Your move: ").lower()]
+        human_move = from_letters(input("Your move: "))
         x = mcts.advance_root(human_move)
         mcts.root.board.flip()
         mcts.root.board.display()
         mcts.root.board.flip()
 
-    print("You win...")
+    return -1
 
 
 if "baby_alphazero" not in os.listdir():
-    model.build(input_shape=(5, 5, 6))
+    model.build(input_shape=(7, 7, 6))
     model.save_weights("baby_alphazero/v1")
 
 

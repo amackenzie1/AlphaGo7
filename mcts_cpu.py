@@ -156,16 +156,12 @@ def play_game(tau, depth):
     policies = []
 
     mcts = MonteCarloSearchTree(tau)
-    mcts.search(depth)
-    boards.append(mcts.root.board.to_array())
-    model_move = mcts.get_move()
-    policies.append(mcts.policy)
-    x = mcts.advance_root(model_move)
+    x = 2
     while x == 2:
         mcts.search(depth)
         boards.append(mcts.root.board.to_array())
-        policies.append(mcts.policy)
         model_move = mcts.get_move() 
+        policies.append(mcts.policy)
         x = mcts.advance_root(model_move)
 
     boards.append(np.array(mcts.root.board.to_array(), dtype='int8'))
@@ -216,16 +212,6 @@ def get_data():
     return games 
 
 
-def benchmark(length):
-    score = 0
-    for i in range(length):
-        print(f"Benchmark game {i+1}")
-        result = play_vs_random()
-        print(result)
-        score += result
-    wins = (score + length)/2 
-    return wins/length 
-
 def getversion():
     return int(open("info.txt").readlines()[0].split()[1])
 
@@ -251,41 +237,6 @@ def process(episode_length):
                 fp = open(f"{os.uname()[1]}:{os.getpid()}_error.txt", "w")
                 fp.write(str(e))
                 fp.close()
-
-
-move_map = {"a1":0, "b1": 1, "c1":2, "d1":3, "e1": 4, "a2":5, "b2":6 , "c2":7, "d2":8,
-            "e2":9, "a3":10, "b3":11, "c3":12, "d3":13, "e3":14, "a4":15, "b4":16,
-            "c4":17, "d4":18, "e4":19, "a5":20, "b5":21, "c5":22, "d5":23, "e5":24, "pass":25}
-
-def play_vs_human(depth):
-    mcts = MonteCarloSearchTree(0.2)
-    mcts.search(depth)
-    model_move = mcts.get_move()
-    mcts.info()
-    x = mcts.advance_root(model_move)
-    mcts.root.board.display()
-    human_move = move_map[input("Your move: ").lower()]
-    mcts.advance_root(human_move)
-    mcts.root.board.flip()
-    mcts.root.board.display()
-    mcts.root.board.flip()
-    
-    while x == 2:
-        mcts.search(depth)
-        model_move = mcts.get_move()
-        mcts.info()
-        x = mcts.advance_root(model_move)
-        mcts.root.board.display()
-        if x != 2:
-            print("I win!")
-            return 1
-        human_move = move_map[input("Your move: ").lower()]
-        x = mcts.advance_root(human_move)
-        mcts.root.board.flip()
-        mcts.root.board.display()
-        mcts.root.board.flip()
-
-    print("You win...")
 
 
 if "baby_alphazero" not in os.listdir():
