@@ -21,16 +21,17 @@ def plot_probs(probs):
     plt.show()
     plt.pause(0.05)
 
-boardlist = pickle.load(open("training_data.p", "rb"))
-board, probs, reward = boardlist[0][40]
-print(probs)
-print(np.argmax(np.array(probs)))
-print(np.sum(board, axis=-1))
-print(len(boardlist[0]))
+if __name__ == "__main__":
+    boardlist = pickle.load(open("training_data.p", "rb"))
+    board, probs, reward = boardlist[0][40]
+    print(probs)
+    print(np.argmax(np.array(probs)))
+    print(np.sum(board, axis=-1))
+    print(len(boardlist[0]))
 
-boards, probs = symmetries(board, probs)
+    boards, probs = symmetries(board, probs)
 
-for i, j in zip(boards, probs):
-    print(j)
-    print(np.argmax(np.array(j)))
-    print(np.sum(i, axis=-1))
+    for i, j in zip(boards, probs):
+        print(j)
+        print(np.argmax(np.array(j)))
+        print(np.sum(i, axis=-1))

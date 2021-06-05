@@ -41,7 +41,7 @@ class Node:
         self.turn = turn 
         self.done = False 
 
-c_puct = 2
+c_puct = 1.5
 
 class MonteCarloSearchTree:
 
@@ -128,7 +128,7 @@ class MonteCarloSearchTree:
                 del self.root.children[i]
         self.root = self.root.children[move]
         self.num_moves += 1
-        if self.num_moves > 30:
+        if self.num_moves > 20:
             self.tau = 0.2
         if self.root.N == 0:
             self.fill(self.root)
@@ -197,7 +197,7 @@ def iterate(episode_length):
 
     for i in range(episode_length):
         print(f"Process {os.getpid()}, game {i+1}")
-        games.append(play_game(1, 400))
+        games.append(play_game(1, 600))
 
     gamefile = str(uuid1())
 

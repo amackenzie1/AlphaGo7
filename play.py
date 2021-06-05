@@ -15,7 +15,7 @@ import random
 from uuid import uuid1
 import sys 
 from board import Board 
-#from plotting import plot_probs
+from plotting import plot_probs
 
 model = get_model()
 
@@ -42,7 +42,8 @@ class Node:
         self.turn = turn 
         self.done = False 
 
-c_puct = 2
+c_puct = 1.5
+
 class MonteCarloSearchTree:
 
     def fill(self, node):
@@ -269,7 +270,7 @@ def play_vs_human(depth):
         mcts.search(depth)
         model_move = mcts.get_move()
         mcts.info()
-        #plot_probs([0 if i not in mcts.root.children.keys() else mcts.root.children[i].P for i in range(50)])
+        plot_probs([0 if i not in mcts.root.children.keys() else mcts.root.children[i].P for i in range(50)])
         x = mcts.advance_root(model_move)
         mcts.root.board.display()
         if x != 2:
@@ -289,4 +290,4 @@ if "baby_alphazero" not in os.listdir():
 
 
 model.load_weights("baby_alphazero/v1")
-play_vs_human(400)
+play_vs_human(800)
