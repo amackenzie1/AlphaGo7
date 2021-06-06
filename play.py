@@ -264,17 +264,19 @@ def from_letters(move):
     return (row-1) * 7 + column
 
 def play_vs_human(depth):
-    mcts = MonteCarloSearchTree(0.2)
+    mcts = MonteCarloSearchTree(0.1)
     x = 2
     while x == 2:
         mcts.search(depth)
         model_move = mcts.get_move()
         mcts.info()
-        plot_probs([0 if i not in mcts.root.children.keys() else mcts.root.children[i].P for i in range(50)])
+        #plot_probs([0 if i not in mcts.root.children.keys() else mcts.root.children[i].P for i in range(50)])
         x = mcts.advance_root(model_move)
         mcts.root.board.display()
+
         if x != 2:
             return 1
+
         human_move = from_letters(input("Your move: "))
         x = mcts.advance_root(human_move)
         mcts.root.board.flip()
@@ -290,4 +292,4 @@ if "baby_alphazero" not in os.listdir():
 
 
 model.load_weights("baby_alphazero/v1")
-play_vs_human(800)
+play_vs_human(600)
